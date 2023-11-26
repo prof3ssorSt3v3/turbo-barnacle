@@ -18,37 +18,44 @@ router.get('/', (request, response) => {
   response.status(200).json({
     data: {
       message: 'Hello from the Movie Night API!',
-      '/start-session': ['requires {String device_id}', 'returns {data: {String message, String session_id }}'],
-      '/join-session': ['requires {String device_id, int code}', 'returns {data: {String message, String session_id }}'],
-      '/vote-movie': ['requires {String session_id, int movie_id, Boolean vote}', 'returns {data: {String message, int movie_id, Boolean match}}'],
+      'GET /start-session': ['requires {String device_id}', 'returns {data: {String message, String session_id }}'],
+      'GET /join-session': ['requires {String device_id, int code}', 'returns {data: {String message, String session_id }}'],
+      'GET /vote-movie': ['requires {String session_id, int movie_id, Boolean vote}', 'returns {data: {String message, int movie_id, Boolean match}}'],
     },
   });
   //TODO: add the list of API endpoints
 });
 
 // Create a new session
-router.post('/start-session', async (req, res) => {
+router.get('/start-session', async (req, res) => {
   //requires {String device_id}
-  //returns {data: {String message, String session_id }}
+  if (!req.device_id) res.status(400).json({ code: 123, message: 'Missing device_id property.' });
 
-  res.status(201).json({ data: { message: 'new session created.', code: createcode(), session_id: createSession() } });
+  //returns {data: {String message, String session_id }}
+  res.status(200).json({ data: { message: 'new session created.', code: createcode(), session_id: createSession() } });
 });
 
 // Join a session
-router.post('/join-session', async (req, res) => {
+router.get('/join-session', async (req, res) => {
   //requires {String device_id, int code}
-  //returns {data: {String message, String session_id }}
+  if (device_id in req == false) res.status(400).json({ code: 123, message: 'Missing device_id parameter.' });
+  if (code in req == false) res.status(400).json({ code: 123, message: 'Missing code parameter.' });
 
-  res.status(201).json({ data: { message: 'new session created.', session_id: createSession() } });
+  //returns {data: {String message, String session_id }}
+  res.status(200).json({ data: { message: 'new session created.', session_id: createSession() } });
 });
 
 // Vote for movie
-router.post('/vote-movie', async (req, res) => {
+router.get('/vote-movie', async (req, res) => {
   //requires {String session_id, int movie_id, Boolean vote}
+  if (session_id in req == false) res.status(400).json({ code: 123, message: 'Missing session_id parameter.' });
+  if (movie_id in req == false) res.status(400).json({ code: 123, message: 'Missing movie_id parameter.' });
+  if (vote in req == false) res.status(400).json({ code: 123, message: 'Missing vote parameter.' });
+
   //returns {data: {String message, int movie_id, Boolean match}}
   // if the vote is true then ~25% of the time return true
   let match = Math.random() * 4 < 1.0 ? true : false;
-  res.status(201).json({ data: { message: 'thanks for voting.', movie_id: req.movie_id, match: match } });
+  res.status(200).json({ data: { message: 'thanks for voting.', movie_id: req.movie_id, match: match } });
 });
 
 export default router;
