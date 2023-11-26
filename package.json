@@ -13,6 +13,11 @@
   ],
   "author": "Steve Griffith",
   "license": "ISC",
+  "homepage": "https://movie-night-api.onrender.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prof3ssorSt3v3/turbo-barnacle"
+  },
   "dependencies": {
     "bcrypt": "^5.1.1",
     "compression": "^1.7.4",
