@@ -39,10 +39,10 @@ router.get('/', (request, response) => {
 // Create a new session
 router.get('/start-session', (req, res) => {
   //requires {String device_id}
-  console.log(req.params);
-  console.log(req.params.device_id);
+  console.log(req.query);
+  console.log(req.query.device_id);
 
-  if (req.params.device_id) {
+  if (req.query.device_id) {
     //returns {data: {String message, String session_id, String code }}
     res.status(200).json({ data: { message: 'new session created.', code: createcode(), session_id: createSession(), code: createcode() } });
   } else {
@@ -53,11 +53,11 @@ router.get('/start-session', (req, res) => {
 // Join a session
 router.get('/join-session', (req, res) => {
   //requires {String device_id, int code}
-  console.log(req.params);
-  console.log(req.params.code);
-  console.log(req.params.device_id);
+  console.log(req.query);
+  console.log(req.query.code);
+  console.log(req.query.device_id);
 
-  if (req.params.device_id && req.params.code) {
+  if (req.query.device_id && req.query.code) {
     //returns {data: {String message, String session_id }}
     res.status(200).json({ data: { message: 'new session created.', session_id: createSession() } });
   } else {
@@ -68,15 +68,15 @@ router.get('/join-session', (req, res) => {
 // Vote for movie
 router.get('/vote-movie', (req, res) => {
   //requires {String session_id, int movie_id, Boolean vote}
-  console.log(req.params);
-  console.log(req.params.movie_id);
-  console.log(req.params.match);
+  console.log(req.query);
+  console.log(req.query.movie_id);
+  console.log(req.query.match);
 
-  if (req.params.session_id && req.params.movie_id && req.params.vote) {
+  if (req.query.session_id && req.query.movie_id && req.query.vote) {
     //returns {data: {String message, int movie_id, Boolean match}}
     // if the vote is true then ~25% of the time return true
     let match = Math.random() * 4 < 1.0 ? true : false;
-    res.status(200).json({ data: { message: 'thanks for voting.', movie_id: req.params.movie_id, match: match } });
+    res.status(200).json({ data: { message: 'thanks for voting.', movie_id: req.query.movie_id, match: match } });
   } else {
     res.status(400).json({ code: 123, message: 'Missing required parameters.' });
   }
