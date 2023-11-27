@@ -1,6 +1,6 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import Redis from 'ioredis';
+// import Redis from 'ioredis';
 const router = express.Router();
 /*
 const { REDIS_URL } = process.env;
@@ -37,7 +37,7 @@ router.get('/', (request, response) => {
 });
 
 // Create a new session
-router.get('/start-session', async (req, res) => {
+router.get('/start-session', (req, res) => {
   //requires {String device_id}
   if (device_id in req.params == false) res.status(400).json({ code: 123, message: 'Missing device_id property.' });
 
@@ -46,7 +46,7 @@ router.get('/start-session', async (req, res) => {
 });
 
 // Join a session
-router.get('/join-session', async (req, res) => {
+router.get('/join-session', (req, res) => {
   //requires {String device_id, int code}
   if (device_id in req.params == false) res.status(400).json({ code: 123, message: 'Missing device_id parameter.' });
   if (code in req.params == false) res.status(400).json({ code: 123, message: 'Missing code parameter.' });
@@ -56,7 +56,7 @@ router.get('/join-session', async (req, res) => {
 });
 
 // Vote for movie
-router.get('/vote-movie', async (req, res) => {
+router.get('/vote-movie', (req, res) => {
   //requires {String session_id, int movie_id, Boolean vote}
   if (session_id in req.params == false) res.status(400).json({ code: 123, message: 'Missing session_id parameter.' });
   if (movie_id in req.params == false) res.status(400).json({ code: 123, message: 'Missing movie_id parameter.' });
