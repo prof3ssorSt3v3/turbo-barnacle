@@ -39,7 +39,7 @@ router.get('/', (request, response) => {
 // Create a new session
 router.get('/start-session', async (req, res) => {
   //requires {String device_id}
-  if (!req.device_id) res.status(400).json({ code: 123, message: 'Missing device_id property.' });
+  if (!req.params.device_id) res.status(400).json({ code: 123, message: 'Missing device_id property.' });
 
   //returns {data: {String message, String session_id, String code }}
   res.status(200).json({ data: { message: 'new session created.', code: createcode(), session_id: createSession(), code: createcode() } });
@@ -48,8 +48,8 @@ router.get('/start-session', async (req, res) => {
 // Join a session
 router.get('/join-session', async (req, res) => {
   //requires {String device_id, int code}
-  if (device_id in req == false) res.status(400).json({ code: 123, message: 'Missing device_id parameter.' });
-  if (code in req == false) res.status(400).json({ code: 123, message: 'Missing code parameter.' });
+  if (device_id in req.params == false) res.status(400).json({ code: 123, message: 'Missing device_id parameter.' });
+  if (code in req.params == false) res.status(400).json({ code: 123, message: 'Missing code parameter.' });
 
   //returns {data: {String message, String session_id }}
   res.status(200).json({ data: { message: 'new session created.', session_id: createSession() } });
@@ -58,9 +58,9 @@ router.get('/join-session', async (req, res) => {
 // Vote for movie
 router.get('/vote-movie', async (req, res) => {
   //requires {String session_id, int movie_id, Boolean vote}
-  if (session_id in req == false) res.status(400).json({ code: 123, message: 'Missing session_id parameter.' });
-  if (movie_id in req == false) res.status(400).json({ code: 123, message: 'Missing movie_id parameter.' });
-  if (vote in req == false) res.status(400).json({ code: 123, message: 'Missing vote parameter.' });
+  if (session_id in req.params == false) res.status(400).json({ code: 123, message: 'Missing session_id parameter.' });
+  if (movie_id in req.params == false) res.status(400).json({ code: 123, message: 'Missing movie_id parameter.' });
+  if (vote in req.params == false) res.status(400).json({ code: 123, message: 'Missing vote parameter.' });
 
   //returns {data: {String message, int movie_id, Boolean match}}
   // if the vote is true then ~25% of the time return true
