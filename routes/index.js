@@ -75,7 +75,12 @@ router.get('/vote-movie', (req, res) => {
   if (req.query.session_id && req.query.movie_id && req.query.vote) {
     //returns {data: {String message, int movie_id, Boolean match}}
     // if the vote is true then ~25% of the time return true
-    let match = Math.random() * 4 < 1.0 ? true : false;
+    let match;
+    if (req.query.vote) {
+      match = Math.random() * 4 < 1.0 ? true : false;
+    } else {
+      match = false;
+    }
     res.status(200).json({ data: { message: 'thanks for voting.', movie_id: req.query.movie_id, match: match } });
   } else {
     res.status(400).json({ code: 123, message: 'Missing required parameters.' });
