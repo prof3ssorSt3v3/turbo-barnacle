@@ -1,6 +1,16 @@
 import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import Redis from 'ioredis';
 const router = express.Router();
+/*
+const { REDIS_URL } = process.env;
+const renderRedis = new Redis(REDIS_URL);
+renderRedis.set("animal", "cat");
+
+renderRedis.get("animal").then((result) => {
+  console.log(result); // Prints "cat"
+});
+*/
 
 function createcode() {
   //create the 4 digit code
@@ -18,7 +28,7 @@ router.get('/', (request, response) => {
   response.status(200).json({
     data: {
       message: 'Hello from the Movie Night API!',
-      'GET /start-session': ['requires {String device_id}', 'returns {data: {String message, String session_id }}'],
+      'GET /start-session': ['requires {String device_id}', 'returns {data: {String message, String session_id, String code }}'],
       'GET /join-session': ['requires {String device_id, int code}', 'returns {data: {String message, String session_id }}'],
       'GET /vote-movie': ['requires {String session_id, int movie_id, Boolean vote}', 'returns {data: {String message, int movie_id, Boolean match}}'],
     },
@@ -31,8 +41,8 @@ router.get('/start-session', async (req, res) => {
   //requires {String device_id}
   if (!req.device_id) res.status(400).json({ code: 123, message: 'Missing device_id property.' });
 
-  //returns {data: {String message, String session_id }}
-  res.status(200).json({ data: { message: 'new session created.', code: createcode(), session_id: createSession() } });
+  //returns {data: {String message, String session_id, String code }}
+  res.status(200).json({ data: { message: 'new session created.', code: createcode(), session_id: createSession(), code: createcode() } });
 });
 
 // Join a session
