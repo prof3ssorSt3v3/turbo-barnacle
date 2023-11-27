@@ -14,8 +14,8 @@ renderRedis.get("animal").then((result) => {
 
 function createcode() {
   //create the 4 digit code
-  return []
-    .fill(0, 0, 3)
+  return Array(4)
+    .fill(0, 0, 4)
     .map((v) => Math.floor(Math.random() * 10).toString())
     .join('');
 }
