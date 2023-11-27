@@ -39,33 +39,47 @@ router.get('/', (request, response) => {
 // Create a new session
 router.get('/start-session', (req, res) => {
   //requires {String device_id}
-  if ('device_id' in req.params == false) res.status(400).json({ code: 123, message: 'Missing device_id property.' });
+  console.log(req.params);
+  console.log(req.params.device_id);
 
-  //returns {data: {String message, String session_id, String code }}
-  res.status(200).json({ data: { message: 'new session created.', code: createcode(), session_id: createSession(), code: createcode() } });
+  if (req.params.device_id) {
+    //returns {data: {String message, String session_id, String code }}
+    res.status(200).json({ data: { message: 'new session created.', code: createcode(), session_id: createSession(), code: createcode() } });
+  } else {
+    res.status(400).json({ code: 123, message: 'Missing device_id property.' });
+  }
 });
 
 // Join a session
 router.get('/join-session', (req, res) => {
   //requires {String device_id, int code}
-  if ('device_id' in req.params == false) res.status(400).json({ code: 123, message: 'Missing device_id parameter.' });
-  if ('code' in req.params == false) res.status(400).json({ code: 123, message: 'Missing code parameter.' });
+  console.log(req.params);
+  console.log(req.params.code);
+  console.log(req.params.device_id);
 
-  //returns {data: {String message, String session_id }}
-  res.status(200).json({ data: { message: 'new session created.', session_id: createSession() } });
+  if (req.params.device_id && req.params.code) {
+    //returns {data: {String message, String session_id }}
+    res.status(200).json({ data: { message: 'new session created.', session_id: createSession() } });
+  } else {
+    res.status(400).json({ code: 123, message: 'Missing required parameter.' });
+  }
 });
 
 // Vote for movie
 router.get('/vote-movie', (req, res) => {
   //requires {String session_id, int movie_id, Boolean vote}
-  if ('session_id' in req.params == false) res.status(400).json({ code: 123, message: 'Missing session_id parameter.' });
-  if ('movie_id' in req.params == false) res.status(400).json({ code: 123, message: 'Missing movie_id parameter.' });
-  if ('vote' in req.params == false) res.status(400).json({ code: 123, message: 'Missing vote parameter.' });
+  console.log(req.params);
+  console.log(req.params.movie_id);
+  console.log(req.params.match);
 
-  //returns {data: {String message, int movie_id, Boolean match}}
-  // if the vote is true then ~25% of the time return true
-  let match = Math.random() * 4 < 1.0 ? true : false;
-  res.status(200).json({ data: { message: 'thanks for voting.', movie_id: req.params.movie_id, match: match } });
+  if (req.params.session_id && req.params.movie_id && req.params.vote) {
+    //returns {data: {String message, int movie_id, Boolean match}}
+    // if the vote is true then ~25% of the time return true
+    let match = Math.random() * 4 < 1.0 ? true : false;
+    res.status(200).json({ data: { message: 'thanks for voting.', movie_id: req.params.movie_id, match: match } });
+  } else {
+    res.status(400).json({ code: 123, message: 'Missing required parameters.' });
+  }
 });
 
 export default router;
