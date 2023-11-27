@@ -39,7 +39,7 @@ router.get('/', (request, response) => {
 // Create a new session
 router.get('/start-session', async (req, res) => {
   //requires {String device_id}
-  if (!req.params.device_id) res.status(400).json({ code: 123, message: 'Missing device_id property.' });
+  if (device_id in req.params == false) res.status(400).json({ code: 123, message: 'Missing device_id property.' });
 
   //returns {data: {String message, String session_id, String code }}
   res.status(200).json({ data: { message: 'new session created.', code: createcode(), session_id: createSession(), code: createcode() } });
@@ -65,7 +65,7 @@ router.get('/vote-movie', async (req, res) => {
   //returns {data: {String message, int movie_id, Boolean match}}
   // if the vote is true then ~25% of the time return true
   let match = Math.random() * 4 < 1.0 ? true : false;
-  res.status(200).json({ data: { message: 'thanks for voting.', movie_id: req.movie_id, match: match } });
+  res.status(200).json({ data: { message: 'thanks for voting.', movie_id: req.params.movie_id, match: match } });
 });
 
 export default router;
