@@ -77,7 +77,7 @@ router.get('/vote-movie', (req, res) => {
     // if the vote is true then ~25% of the time return true
     let vote = req.query.vote;
     let match = false;
-    if (vote) {
+    if (vote == true) {
       // console.log(req.query.vote);
       let num = Math.random() * 4;
       match = num > 3.0 ? true : false;
