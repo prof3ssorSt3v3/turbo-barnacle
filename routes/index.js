@@ -76,8 +76,8 @@ router.get('/vote-movie', (req, res) => {
     //returns {data: {String message, int movie_id, Boolean match}}
     // if the vote is true then ~25% of the time return true
     let match;
-    if (req.query.vote && req.query.vote == true) {
-      match = Math.random() * 4 < 1.0 ? true : false;
+    if (req.query.vote == true) {
+      match = Math.random() * 3 < 1.0 ? true : false;
     } else {
       match = false;
     }
