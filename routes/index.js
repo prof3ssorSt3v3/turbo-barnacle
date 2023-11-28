@@ -75,13 +75,12 @@ router.get('/vote-movie', (req, res) => {
   if (req.query.session_id && req.query.movie_id && req.query.vote) {
     //returns {data: {String message, int movie_id, Boolean match}}
     // if the vote is true then ~25% of the time return true
-    let match;
+    let match = false;
     if (Boolean(req.query.vote) === true) {
       // console.log(req.query.vote);
-      match = Math.random() * 3 < 1.0 ? true : false;
-      // console.log(match);
-    } else {
-      match = false;
+      let num = Math.random() * 4;
+      match = num > 3.0 ? true : false;
+      console.log(num, match);
     }
     res.status(200).json({ data: { message: 'thanks for voting.', movie_id: req.query.movie_id, match: match } });
   } else {
