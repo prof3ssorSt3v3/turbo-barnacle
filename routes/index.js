@@ -29,13 +29,17 @@ function createSession() {
 }
 
 router.get('/', (request, response) => {
-  response.status(200).json({
-    data: {
-      message: 'Hello from the Movie Night API! PLEASE NOTE THAT REDIS TESTING AND CHANGES ARE STILL UNDERWAY.',
-      'GET /start-session': ['requires {String device_id}', 'returns {data: {String message, String session_id, String code }}'],
-      'GET /join-session': ['requires {String device_id, int code}', 'returns {data: {String message, String session_id }}'],
-      'GET /vote-movie': ['requires {String session_id, int movie_id, Boolean vote}', 'returns {data: {String message, int movie_id, Boolean match}}'],
-    },
+  redisClient.set('codes', JSON.stringify([])).then(() => {
+    redisClient.set('sessions', JSON.stringify([]));
+    //reset
+    response.status(200).json({
+      data: {
+        message: 'Hello from the Movie Night API! PLEASE NOTE THAT REDIS TESTING AND CHANGES ARE STILL UNDERWAY.',
+        'GET /start-session': ['requires {String device_id}', 'returns {data: {String message, String session_id, String code }}'],
+        'GET /join-session': ['requires {String device_id, int code}', 'returns {data: {String message, String session_id }}'],
+        'GET /vote-movie': ['requires {String session_id, int movie_id, Boolean vote}', 'returns {data: {String message, int movie_id, Boolean match}}'],
+      },
+    });
   });
 });
 
@@ -60,17 +64,17 @@ router.get('/start-session', (req, res) => {
         }
         codes.push({ code, session_id, device_ids });
         redisClient
-          .set('codes', codes)
+          .set('codes', JSON.stringify(codes))
           .then(function () {
             return redisClient.get('sessions');
             //create the initial entry in sessions too
           })
           .then(function (sessions) {
             if (sessions == null) {
-              return redisClient.set('sessions', [{ session_id, movie_ids: {} }]);
+              return redisClient.set('sessions', JSON.stringify([{ session_id, movie_ids: {} }]));
             } else {
               sessions.push({ session_id, movie_ids: {} });
-              return redisClient.push('sessions', sessions);
+              return redisClient.set('sessions', JSON.stringify(sessions));
             }
           })
           .then(function () {
@@ -103,6 +107,7 @@ router.get('/join-session', (req, res) => {
       .get('codes')
       .then((codes) => {
         //find the matching code, add the device id, retrieve the session_id
+        codes = JSON.parse(codes);
         let newcodes = codes.map((obj) => {
           if (obj.code == code) {
             session_id = obj.session_id; //get the session_id
@@ -113,7 +118,7 @@ router.get('/join-session', (req, res) => {
           }
         });
         redisClient
-          .set('codes', newcodes)
+          .set('codes', JSON.stringify(newcodes))
           .then(() => {
             //the entry in sessions [] should already exist
             //send the message and session back to user
@@ -152,6 +157,7 @@ router.get('/vote-movie', (req, res) => {
     redisClient
       .get('codes')
       .then((codes) => {
+        codes = JSON.parse(codes);
         let codeobj = codes.filter((obj) => {
           if (obj.session_id == session_id) return true;
         });
@@ -160,6 +166,7 @@ router.get('/vote-movie', (req, res) => {
         redisClient
           .get('sessions')
           .then((sessions) => {
+            sessions = JSON.parse(sessions);
             if (sessions == null) {
               //error handling
               sessions = [];
@@ -195,7 +202,7 @@ router.get('/vote-movie', (req, res) => {
               }
             }
             renderRedis
-              .set('sessions', copysessions)
+              .set('sessions', JSON.stringify(copysessions))
               .then(() => {
                 //now set
                 res.status(200).json({ data: { message: 'thanks for voting.', movie_id, match } });
