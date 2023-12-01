@@ -55,7 +55,7 @@ router.get('/start-session', (req, res) => {
     redisClient
       .get('codes')
       .then((codes) => {
-        console.log(typeof codes);
+        // console.log(typeof codes);
         console.log(codes.toString());
         codes = JSON.parse(codes);
         let device_ids = [device_id];
@@ -70,6 +70,7 @@ router.get('/start-session', (req, res) => {
             //create the initial entry in sessions too
           })
           .then(function (sessions) {
+            sessions = JSON.parse(sessions);
             if (sessions == null) {
               return redisClient.set('sessions', JSON.stringify([{ session_id, movie_ids: {} }]));
             } else {
