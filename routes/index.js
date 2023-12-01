@@ -1,11 +1,18 @@
-import express from 'express';
-import { v4 as uuidv4 } from 'uuid';
 import Redis from 'ioredis';
-const router = express.Router();
 // const { REDIS_URL } = process.env;
-const REDIS_URL = 'redis://red-clklgiuaov6s738a47k0:6379';
-const renderRedis = new Redis(REDIS_URL);
+// const REDIS_URL = 'redis://red-clklgiuaov6s738a47k0:6379';
+const renderRedis = new Redis({
+  // Use Render Redis service name as host, red-xxxxxxxxxxxxxxxxxxxx
+  host: 'redis://red-clklgiuaov6s738a47k0',
+  // Default Redis port
+  port: 6379,
+});
+// const renderRedis = new Redis(REDIS_URL);
 console.log(REDIS_URL);
+
+import express from 'express';
+const router = express.Router();
+import { v4 as uuidv4 } from 'uuid';
 /*
 renderRedis.set("codes", [{"code":"1234", "session_id":"abcd", device_ids:[] },]);
 renderRedis.set("sessions", [{"session_id":"abcd", "movie_ids":{123:2, 456:1} },]);
