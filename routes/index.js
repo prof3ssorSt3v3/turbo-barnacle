@@ -58,11 +58,12 @@ router.get('/start-session', (req, res) => {
         // console.log(typeof codes);
         console.log(codes.toString());
         codes = JSON.parse(codes);
-        let device_ids = [device_id];
         if (codes == null) {
-          codes = [];
+          codes = [{ code, session_id, device_ids: [device_id] }];
+        } else {
+          let device_ids = [...codes.device_ids, device_id];
+          codes.push({ code, session_id, device_ids });
         }
-        codes.push({ code, session_id, device_ids });
         redisClient
           .set('codes', JSON.stringify(codes))
           .then(function () {
