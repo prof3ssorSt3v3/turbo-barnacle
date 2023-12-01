@@ -1,15 +1,10 @@
 import Redis from 'ioredis';
 // const { REDIS_URL } = process.env;
-// const REDIS_URL = 'redis://red-clklgiuaov6s738a47k0:6379';
-const renderRedis = new Redis({
-  // Use Render Redis service name as host, red-xxxxxxxxxxxxxxxxxxxx
-  host: 'red-clklgiuaov6s738a47k0',
-  // Default Redis port
-  port: 6379,
-  maxRetriesPerRequest: 3,
-});
-// const renderRedis = new Redis(REDIS_URL);
-// console.log(REDIS_URL);
+const REDIS_URL = 'redis://red-clklgiuaov6s738a47k0:6379/4';
+// const REDIS_URL = 'redis://127.0.0.1:6380';
+// const renderRedis = new Redis();
+const renderRedis = new Redis(REDIS_URL);
+console.log(REDIS_URL);
 
 import express from 'express';
 const router = express.Router();
