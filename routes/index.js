@@ -3,7 +3,7 @@ import Redis from 'ioredis';
 // const REDIS_URL = 'redis://red-clklgiuaov6s738a47k0:6379';
 const renderRedis = new Redis({
   // Use Render Redis service name as host, red-xxxxxxxxxxxxxxxxxxxx
-  host: 'redis://red-clklgiuaov6s738a47k0',
+  host: 'red-clklgiuaov6s738a47k0',
   // Default Redis port
   port: 6379,
   maxRetriesPerRequest: 3,
