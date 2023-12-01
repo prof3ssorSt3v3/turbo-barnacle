@@ -69,9 +69,24 @@ router.get('/start-session', (req, res) => {
       .then((codes) => {
         // console.log(codes);
         let device_ids = [device_id];
+        if (codes == null) {
+          codes = [];
+        }
         codes.push({ code, session_id, device_ids });
         redisClient
           .set('codes', codes)
+          .then(function () {
+            return redisClient.get('sessions');
+            //create the initial entry in sessions too
+          })
+          .then(function (sessions) {
+            if (sessions == null) {
+              return redisClient.set('sessions', [{ session_id, movie_ids: {} }]);
+            } else {
+              sessions.push({ session_id, movie_ids: {} });
+              return redisClient.push('sessions', sessions);
+            }
+          })
           .then(function () {
             //returns {data: {String message, String session_id, String code }}
             res.status(200).json({ data: { message: 'new session created.', code, session_id } });
@@ -114,6 +129,7 @@ router.get('/join-session', (req, res) => {
         redisClient
           .set('codes', newcodes)
           .then(() => {
+            //the entry in sessions [] should already exist
             //send the message and session back to user
             //returns {data: {String message, String session_id }}
             res.status(200).json({ data: { message: 'new session created.', session_id } });
@@ -153,13 +169,17 @@ router.get('/vote-movie', (req, res) => {
         let codeobj = codes.filter((obj) => {
           if (obj.session_id == session_id) return true;
         });
-        let numPlayers = codeobj?.device_ids.length ?? 0;
+        let numPlayers = codeobj?.movie_ids.entries().length ?? 0;
         //[{"session_id":"abcd", "movie_ids":{123:2, 456:1} },]
         redisClient
           .get('sessions')
           .then((sessions) => {
+            if (sessions == null) {
+              //error handling
+              sessions = [];
+            }
             let currentsession;
-            let newsessions = sessions.map((item) => {
+            let copysessions = sessions.map((item) => {
               if (numPlayers && (vote == true || vote == 'true') && item.session_id == session_id) {
                 let count = 1;
                 if (movie_id in item.movie_ids) {
@@ -189,7 +209,7 @@ router.get('/vote-movie', (req, res) => {
               }
             }
             renderRedis
-              .set('sessions', newsessions)
+              .set('sessions', copysessions)
               .then(() => {
                 //now set
                 res.status(200).json({ data: { message: 'thanks for voting.', movie_id, match } });
