@@ -1,24 +1,8 @@
 import Redis from 'ioredis';
 // const { REDIS_URL } = process.env;
 const REDIS_URL = 'redis://red-cll5ht6aov6s73f2m1c0:6379';
-
 const redisClient = new Redis(REDIS_URL);
 // console.log(REDIS_URL);
-// import { createClient } from 'redis';
-
-// let redisClient;
-/*
-async function connect() {
-  redisClient = await createClient({ url: REDIS_URL });
-
-  redisClient.on('error', (err) => {
-    console.log('Redis Client Error', err);
-    redisClient.quit();
-  });
-
-  await redisClient?.connect();
-}
-*/
 
 import express from 'express';
 const router = express.Router();
@@ -68,7 +52,7 @@ router.get('/start-session', (req, res) => {
       .get('codes')
       .then((codes) => {
         console.log(typeof codes);
-        console.log(codes);
+        console.log(codes.toString());
         codes = JSON.parse(codes);
         let device_ids = [device_id];
         if (codes == null) {
