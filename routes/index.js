@@ -68,6 +68,7 @@ router.get('/start-session', (req, res) => {
       .get('codes')
       .then((codes) => {
         console.log(typeof codes);
+        console.log(codes);
         codes = JSON.parse(codes);
         let device_ids = [device_id];
         if (codes == null) {
