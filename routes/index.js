@@ -2,7 +2,8 @@ import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import Redis from 'ioredis';
 const router = express.Router();
-const { REDIS_URL } = process.env;
+// const { REDIS_URL } = process.env;
+const REDIS_URL = 'redis://red-clklgiuaov6s738a47k0:6379';
 const renderRedis = new Redis(REDIS_URL);
 console.log(REDIS_URL);
 /*
