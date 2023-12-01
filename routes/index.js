@@ -29,18 +29,18 @@ function createSession() {
 }
 
 router.get('/', (request, response) => {
-  redisClient.set('codes', JSON.stringify([])).then(() => {
-    redisClient.set('sessions', JSON.stringify([]));
-    //reset
-    response.status(200).json({
-      data: {
-        message: 'Hello from the Movie Night API! PLEASE NOTE THAT REDIS TESTING AND CHANGES ARE STILL UNDERWAY.',
-        'GET /start-session': ['requires {String device_id}', 'returns {data: {String message, String session_id, String code }}'],
-        'GET /join-session': ['requires {String device_id, int code}', 'returns {data: {String message, String session_id }}'],
-        'GET /vote-movie': ['requires {String session_id, int movie_id, Boolean vote}', 'returns {data: {String message, int movie_id, Boolean match}}'],
-      },
-    });
+  // redisClient.set('codes', JSON.stringify([])).then(() => {
+  //   redisClient.set('sessions', JSON.stringify([]));
+  //reset
+  response.status(200).json({
+    data: {
+      message: 'Hello from the Movie Night API! PLEASE NOTE THAT REDIS TESTING AND CHANGES ARE STILL UNDERWAY.',
+      'GET /start-session': ['requires {String device_id}', 'returns {data: {String message, String session_id, String code }}'],
+      'GET /join-session': ['requires {String device_id, int code}', 'returns {data: {String message, String session_id }}'],
+      'GET /vote-movie': ['requires {String session_id, int movie_id, Boolean vote}', 'returns {data: {String message, int movie_id, Boolean match}}'],
+    },
   });
+  // });
 });
 
 // Create a new session
