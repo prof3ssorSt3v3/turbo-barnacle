@@ -7,9 +7,7 @@
 // console.log(REDIS_URL);
 import { createClient } from 'redis';
 const { REDIS_URL } = process.env;
-const redisClient = createClient({
-  url: REDIS_URL,
-});
+const redisClient = {}; //createClient({ url: REDIS_URL });
 redisClient.on('error', (err) => console.log('Redis Client Error', err));
 
 import express from 'express';
