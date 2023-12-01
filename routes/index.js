@@ -113,9 +113,12 @@ router.get('/vote-movie', (req, res) => {
       renderRedis.get('sessions').then((sessions) => {
         let currentsession;
         let newsessions = sessions.map((item) => {
-          if ((vote == true || vote == 'true') && item.session_id == session_id) {
-            let count = item.movie_ids[movie_id] ?? 0;
-            count++;
+          if (numPlayers && (vote == true || vote == 'true') && item.session_id == session_id) {
+            let count = 1;
+            if (movie_id in item.movie_ids) {
+              count++;
+            }
+            //only add the movie id when they voted yes
             item.movie_ids[movie_id] = count;
             if (numPlayers == count) {
               //we have a winner!
@@ -126,10 +129,12 @@ router.get('/vote-movie', (req, res) => {
           return item;
         });
         if (match == false) {
-          //check for other possible winners in the device_ids array
-          let entries = currentsession.device_ids.entries();
-          for (const [m, v] of entries) {
+          //check for other possible winners in the movie_ids array
+          let movieVotes = currentsession.movie_ids.entries();
+          for (const [m, v] of movieVotes) {
+            //this loop will be in the order that movie ids were added to the array
             if (v == numPlayers) {
+              //all the players voted yes
               match = true;
               movie_id = m;
               break;
