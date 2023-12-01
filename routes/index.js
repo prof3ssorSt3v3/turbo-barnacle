@@ -4,6 +4,7 @@ import Redis from 'ioredis';
 const router = express.Router();
 const { REDIS_URL } = process.env;
 const renderRedis = new Redis(REDIS_URL);
+console.log(REDIS_URL);
 /*
 renderRedis.set("codes", [{"code":"1234", "session_id":"abcd", device_ids:[] },]);
 renderRedis.set("sessions", [{"session_id":"abcd", "movie_ids":{123:2, 456:1} },]);
@@ -45,15 +46,25 @@ router.get('/start-session', (req, res) => {
     let session_id = createSession();
     let code = createCode();
     let { device_id } = req.query;
-    renderRedis.get('codes').then((codes) => {
-      // console.log(codes);
-      let device_ids = [device_id];
-      codes.push({ code, session_id, device_ids });
-      renderRedis.set('codes', codes).then(function () {
-        //returns {data: {String message, String session_id, String code }}
-        res.status(200).json({ data: { message: 'new session created.', code, session_id } });
+    renderRedis
+      .get('codes')
+      .then((codes) => {
+        // console.log(codes);
+        let device_ids = [device_id];
+        codes.push({ code, session_id, device_ids });
+        renderRedis
+          .set('codes', codes)
+          .then(function () {
+            //returns {data: {String message, String session_id, String code }}
+            res.status(200).json({ data: { message: 'new session created.', code, session_id } });
+          })
+          .catch((err) => {
+            console.log(`Failed Redis set ${err}`);
+          });
+      })
+      .catch((err) => {
+        console.log(`Failed Redis get ${err}`);
       });
-    });
   } else {
     res.status(400).json({ code: 123, message: 'Missing device_id property.' });
   }
@@ -67,23 +78,33 @@ router.get('/join-session', (req, res) => {
     let { code } = req.query;
     let session_id = '';
 
-    renderRedis.get('codes').then((codes) => {
-      //find the matching code, add the device id, retrieve the session_id
-      let newcodes = codes.map((obj) => {
-        if (obj.code == code) {
-          session_id = obj.session_id; //get the session_id
-          obj.device_ids.push(device_id); //add the device_id
-          return obj;
-        } else {
-          return obj;
-        }
+    renderRedis
+      .get('codes')
+      .then((codes) => {
+        //find the matching code, add the device id, retrieve the session_id
+        let newcodes = codes.map((obj) => {
+          if (obj.code == code) {
+            session_id = obj.session_id; //get the session_id
+            obj.device_ids.push(device_id); //add the device_id
+            return obj;
+          } else {
+            return obj;
+          }
+        });
+        renderRedis
+          .set('codes', newcodes)
+          .then(() => {
+            //send the message and session back to user
+            //returns {data: {String message, String session_id }}
+            res.status(200).json({ data: { message: 'new session created.', session_id } });
+          })
+          .catch((err) => {
+            console.log(`Failed Redis set ${err}`);
+          });
+      })
+      .catch((err) => {
+        console.log(`Failed Redis get ${err}`);
       });
-      renderRedis.set('codes', newcodes).then(() => {
-        //send the message and session back to user
-        //returns {data: {String message, String session_id }}
-        res.status(200).json({ data: { message: 'new session created.', session_id } });
-      });
-    });
   } else {
     res.status(400).json({ code: 123, message: 'Missing required parameter.' });
   }
@@ -104,49 +125,64 @@ router.get('/vote-movie', (req, res) => {
     // if the vote is true then ~25% of the time return true
     let { vote, session_id, movie_id } = req.query;
     let match = false;
-    renderRedis.get('codes').then((codes) => {
-      let codeobj = codes.filter((obj) => {
-        if (obj.session_id == session_id) return true;
-      });
-      let numPlayers = codeobj?.device_ids.length ?? 0;
-      //[{"session_id":"abcd", "movie_ids":{123:2, 456:1} },]
-      renderRedis.get('sessions').then((sessions) => {
-        let currentsession;
-        let newsessions = sessions.map((item) => {
-          if (numPlayers && (vote == true || vote == 'true') && item.session_id == session_id) {
-            let count = 1;
-            if (movie_id in item.movie_ids) {
-              count++;
-            }
-            //only add the movie id when they voted yes
-            item.movie_ids[movie_id] = count;
-            if (numPlayers == count) {
-              //we have a winner!
-              match = true;
-            }
-          }
-          currentsession = item;
-          return item;
+    renderRedis
+      .get('codes')
+      .then((codes) => {
+        let codeobj = codes.filter((obj) => {
+          if (obj.session_id == session_id) return true;
         });
-        if (match == false) {
-          //check for other possible winners in the movie_ids array
-          let movieVotes = currentsession.movie_ids.entries();
-          for (const [m, v] of movieVotes) {
-            //this loop will be in the order that movie ids were added to the array
-            if (v == numPlayers) {
-              //all the players voted yes
-              match = true;
-              movie_id = m;
-              break;
+        let numPlayers = codeobj?.device_ids.length ?? 0;
+        //[{"session_id":"abcd", "movie_ids":{123:2, 456:1} },]
+        renderRedis
+          .get('sessions')
+          .then((sessions) => {
+            let currentsession;
+            let newsessions = sessions.map((item) => {
+              if (numPlayers && (vote == true || vote == 'true') && item.session_id == session_id) {
+                let count = 1;
+                if (movie_id in item.movie_ids) {
+                  count++;
+                }
+                //only add the movie id when they voted yes
+                item.movie_ids[movie_id] = count;
+                if (numPlayers == count) {
+                  //we have a winner!
+                  match = true;
+                }
+              }
+              currentsession = item;
+              return item;
+            });
+            if (match == false) {
+              //check for other possible winners in the movie_ids array
+              let movieVotes = currentsession.movie_ids.entries();
+              for (const [m, v] of movieVotes) {
+                //this loop will be in the order that movie ids were added to the array
+                if (v == numPlayers) {
+                  //all the players voted yes
+                  match = true;
+                  movie_id = m;
+                  break;
+                }
+              }
             }
-          }
-        }
-        renderRedis.set('sessions', newsessions).then(() => {
-          //now set
-          res.status(200).json({ data: { message: 'thanks for voting.', movie_id, match } });
-        });
+            renderRedis
+              .set('sessions', newsessions)
+              .then(() => {
+                //now set
+                res.status(200).json({ data: { message: 'thanks for voting.', movie_id, match } });
+              })
+              .catch((err) => {
+                console.log(`Failed Redis set sessions ${err}`);
+              });
+          })
+          .catch((err) => {
+            console.log(`Failed Redis get sessions ${err}`);
+          });
+      })
+      .catch((err) => {
+        console.log(`Failed Redis get codes ${err}`);
       });
-    });
 
     // if (vote == true || vote == 'true') {
     //   // console.log(req.query.vote);
