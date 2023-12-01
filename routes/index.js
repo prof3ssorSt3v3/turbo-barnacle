@@ -6,6 +6,7 @@ const renderRedis = new Redis({
   host: 'redis://red-clklgiuaov6s738a47k0',
   // Default Redis port
   port: 6379,
+  maxRetriesPerRequest: 3,
 });
 // const renderRedis = new Redis(REDIS_URL);
 console.log(REDIS_URL);
