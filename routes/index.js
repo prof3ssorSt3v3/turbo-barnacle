@@ -9,7 +9,7 @@ const renderRedis = new Redis({
   maxRetriesPerRequest: 3,
 });
 // const renderRedis = new Redis(REDIS_URL);
-console.log(REDIS_URL);
+// console.log(REDIS_URL);
 
 import express from 'express';
 const router = express.Router();
