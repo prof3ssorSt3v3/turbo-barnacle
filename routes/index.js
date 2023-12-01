@@ -59,7 +59,7 @@ router.get('/', (request, response) => {
 router.get('/start-session', (req, res) => {
   //requires {String device_id}
   // create the code, create the session, save both plus device id
-  if (req.query.device_id) {
+  if ('device_id' in req.query) {
     // connect().then(() => {
     let session_id = createSession();
     let code = createCode();
@@ -67,7 +67,8 @@ router.get('/start-session', (req, res) => {
     redisClient
       .get('codes')
       .then((codes) => {
-        // console.log(codes);
+        console.log(typeof codes);
+        codes = JSON.parse(codes);
         let device_ids = [device_id];
         if (codes == null) {
           codes = [];
