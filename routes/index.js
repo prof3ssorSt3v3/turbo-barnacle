@@ -29,9 +29,22 @@ function createSession() {
 }
 
 router.get('/', (request, response) => {
-  // redisClient.set('codes', JSON.stringify([])).then(() => {
-  //   redisClient.set('sessions', JSON.stringify([]));
-  //reset
+  // clear out old sessions from 'codes'
+  const LIMIT = 1000 * 60 * 90; //90 minutes
+  redisClient.get('codes').then((codes) => {
+    codes = JSON.parse(codes);
+    codes = codes.filter((item) => {
+      //remove entries that are more than 90 minutes old
+      if (item.timestamp + LIMIT < Date.now() || !('timestamp' in item)) {
+        //remove
+        return false;
+      } else {
+        //keep
+        return true;
+      }
+    });
+    redisClient.set('codes', JSON.stringify(codes));
+  });
   response.status(200).json({
     data: {
       message: 'Hello from the Movie Night API! PLEASE NOTE THAT REDIS TESTING AND CHANGES ARE STILL UNDERWAY.',
@@ -58,11 +71,12 @@ router.get('/start-session', (req, res) => {
         // console.log(typeof codes);
         console.log(codes.toString());
         codes = JSON.parse(codes);
+        let timestamp = Date.now();
         if (codes == null) {
-          codes = [{ code, session_id, device_ids: [device_id] }];
+          codes = [{ code, session_id, device_ids: [device_id], timestamp }];
         } else {
           let device_ids = [...codes.device_ids, device_id];
-          codes.push({ code, session_id, device_ids });
+          codes.push({ code, session_id, device_ids, timestamp });
         }
         redisClient
           .set('codes', JSON.stringify(codes))
