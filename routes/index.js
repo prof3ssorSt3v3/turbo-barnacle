@@ -28,6 +28,10 @@ function createSession() {
   return uuidv4();
 }
 
+function isIterable(obj) {
+  return typeof obj[Symbol.iterator] === 'function';
+}
+
 router.get('/', (request, response) => {
   // clear out old sessions from 'codes'
   const LIMIT = 1000 * 60 * 90; //90 minutes
@@ -75,7 +79,10 @@ router.get('/start-session', (req, res) => {
         if (codes == null) {
           codes = [{ code, session_id, device_ids: [device_id], timestamp }];
         } else {
-          let device_ids = [...codes.device_ids, device_id];
+          let device_ids = [device_id];
+          if (isIterable(codes.device_ids)) {
+            device_ids.push(...codes.device_ids);
+          }
           codes.push({ code, session_id, device_ids, timestamp });
         }
         redisClient
