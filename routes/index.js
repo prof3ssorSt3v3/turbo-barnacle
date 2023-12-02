@@ -199,7 +199,11 @@ router.get('/vote-movie', (req, res) => {
                 index = idx;
                 let count = 1;
                 if (movie_id in item.movie_ids) {
-                  count = item.movie_ids + 1;
+                  if (typeof item.movie_id == 'number') {
+                    count = item.movie_id + 1;
+                  } else {
+                    count = 1;
+                  }
                 }
                 //only add the movie id when they voted yes
                 item.movie_ids[movie_id] = count;
