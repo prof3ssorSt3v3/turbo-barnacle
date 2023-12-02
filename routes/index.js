@@ -193,10 +193,10 @@ router.get('/vote-movie', (req, res) => {
               //error handling
               sessions = [];
             }
-            let currentsession;
-            let copysessions = sessions.map((item) => {
+            let index;
+            let copysessions = sessions.map((item, idx) => {
               if (numPlayers && (vote == true || vote == 'true') && item.session_id == session_id) {
-                currentsession = item;
+                index = idx;
                 let count = 1;
                 if (movie_id in item.movie_ids) {
                   count = item.movie_ids + 1;
@@ -210,11 +210,11 @@ router.get('/vote-movie', (req, res) => {
               }
               return item;
             });
-            console.log(copysessions);
+            console.log(copysessions[index]);
             if (match == false) {
               //check for other possible winners in the movie_ids array
-              console.log(`currentsession ${currentsession}`);
-              let movieVotes = currentsession.movie_ids.entries();
+              console.log(`currentsession ${copysessions[index]}`);
+              let movieVotes = copysessions[index].movie_ids.entries();
               for (const [m, v] of movieVotes) {
                 //this loop will be in the order that movie ids were added to the array
                 if (v == numPlayers) {
