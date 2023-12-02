@@ -179,8 +179,10 @@ router.get('/vote-movie', (req, res) => {
       .then((codes) => {
         codes = JSON.parse(codes);
         let codeobj = codes.find((obj) => {
+          console.log(`match ${obj.session_id}`);
           if (obj.session_id == session_id) return true;
         });
+        console.log(codeobj);
         let numPlayers = codeobj?.device_ids.entries().length ?? 0;
         //[{"session_id":"abcd", "device_ids":[1234, 4567], code: "abcd" },]
         redisClient
