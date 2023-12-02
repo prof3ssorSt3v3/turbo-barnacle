@@ -174,11 +174,11 @@ router.get('/vote-movie', (req, res) => {
       .get('codes')
       .then((codes) => {
         codes = JSON.parse(codes);
-        let codeobj = codes.filter((obj) => {
+        let codeobj = codes.find((obj) => {
           if (obj.session_id == session_id) return true;
         });
-        let numPlayers = codeobj?.movie_ids.entries().length ?? 0;
-        //[{"session_id":"abcd", "movie_ids":{123:2, 456:1} },]
+        let numPlayers = codeobj?.device_ids.entries().length ?? 0;
+        //[{"session_id":"abcd", "device_ids":[1234, 4567], code: "abcd" },]
         redisClient
           .get('sessions')
           .then((sessions) => {
