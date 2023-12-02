@@ -210,6 +210,7 @@ router.get('/vote-movie', (req, res) => {
               }
               return item;
             });
+            console.log(copysessions);
             if (match == false) {
               //check for other possible winners in the movie_ids array
               console.log(`currentsession ${currentsession}`);
