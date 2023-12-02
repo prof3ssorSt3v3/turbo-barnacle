@@ -226,7 +226,7 @@ router.get('/vote-movie', (req, res) => {
                 }
               }
             }
-            renderRedis
+            redisClient
               .set('sessions', JSON.stringify(copysessions))
               .then(() => {
                 //now set
