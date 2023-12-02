@@ -213,10 +213,11 @@ router.get('/vote-movie', (req, res) => {
             console.log(copysessions[index]);
             if (match == false) {
               //check for other possible winners in the movie_ids array
-              console.log(`currentsession ${copysessions[index]}`);
+              console.log(copysessions[index]);
               let movieVotes = copysessions[index].movie_ids.entries();
               for (const [m, v] of movieVotes) {
                 //this loop will be in the order that movie ids were added to the array
+                console.log(m, v);
                 if (v == numPlayers) {
                   //all the players voted yes
                   match = true;
