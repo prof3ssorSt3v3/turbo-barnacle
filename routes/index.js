@@ -131,7 +131,10 @@ router.get('/join-session', (req, res) => {
         let newcodes = codes.map((obj) => {
           if (obj.code == code) {
             session_id = obj.session_id; //get the session_id
-            obj.device_ids.push(device_id); //add the device_id
+            let deviceSet = new Set(obj.device_ids);
+            deviceSet.add(device_id);
+            // obj.device_ids.push(device_id); //add the device_id
+            obj.device_ids = Array.from(deviceSet);
             return obj;
           } else {
             return obj;
