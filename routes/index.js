@@ -128,8 +128,10 @@ router.get('/join-session', (req, res) => {
       .then((codes) => {
         //find the matching code, add the device id, retrieve the session_id
         codes = JSON.parse(codes);
+        let match = false;
         let newcodes = codes.map((obj) => {
           if (obj.code == code) {
+            match = true;
             session_id = obj.session_id; //get the session_id
             let deviceSet = new Set(obj.device_ids);
             deviceSet.add(device_id);
@@ -140,17 +142,21 @@ router.get('/join-session', (req, res) => {
             return obj;
           }
         });
-        redisClient
-          .set('codes', JSON.stringify(newcodes))
-          .then(() => {
-            //the entry in sessions [] should already exist
-            //send the message and session back to user
-            //returns {data: {String message, String session_id }}
-            res.status(200).json({ data: { message: 'new session created.', session_id } });
-          })
-          .catch((err) => {
-            console.log(`Failed Redis set ${err}`);
-          });
+        if (match == false) {
+          res.status(400).json({ code: 786, message: 'No match for code.' });
+        } else {
+          redisClient
+            .set('codes', JSON.stringify(newcodes))
+            .then(() => {
+              //the entry in sessions [] should already exist
+              //send the message and session back to user
+              //returns {data: {String message, String session_id }}
+              res.status(200).json({ data: { message: 'new session created.', session_id } });
+            })
+            .catch((err) => {
+              console.log(`Failed Redis set ${err}`);
+            });
+        }
       })
       .catch((err) => {
         console.log(`Failed Redis get ${err}`);
@@ -192,66 +198,73 @@ router.get('/vote-movie', (req, res) => {
         }
         let numPlayers = codeobj?.device_ids.length ?? 0;
         //[{"session_id":"abcd", "device_ids":[1234, 4567], code: "abcd" },]
-        redisClient
-          .get('sessions')
-          .then((sessions) => {
-            sessions = JSON.parse(sessions);
-            if (sessions == null) {
-              //error handling
-              sessions = [];
-            }
-            let index;
-            let copysessions = sessions.map((item, idx) => {
-              if (numPlayers && (vote == true || vote == 'true') && item.session_id == session_id) {
-                index = idx;
-                let count = 1;
-                if (movie_id in item.movie_ids) {
-                  if (typeof item.movie_ids[movie_id] == 'number') {
-                    count = item.movie_ids[movie_id] + 1;
-                  } else {
-                    count = 1;
+        if (numPlayers > 0) {
+          redisClient
+            .get('sessions')
+            .then((sessions) => {
+              sessions = JSON.parse(sessions);
+              if (sessions == null) {
+                //error handling
+                sessions = [];
+              }
+              let index;
+              let copysessions = sessions.map((item, idx) => {
+                if ((vote == true || vote == 'true') && item.session_id == session_id) {
+                  index = idx;
+                  let count = 1;
+                  if (movie_id in item.movie_ids) {
+                    if (typeof item.movie_ids[movie_id] == 'number') {
+                      count = item.movie_ids[movie_id] + 1;
+                    } else {
+                      count = 1;
+                    }
+                  }
+                  //only add the movie id when they voted yes
+                  item.movie_ids[movie_id] = count;
+                  if (numPlayers == count) {
+                    //we have a winner!
+                    match = true;
                   }
                 }
-                //only add the movie id when they voted yes
-                item.movie_ids[movie_id] = count;
-                if (numPlayers == count) {
-                  //we have a winner!
-                  match = true;
-                }
-              }
-              return item;
-            });
-            console.log(copysessions[index]);
-            if (match == false) {
-              //check for other possible winners in the movie_ids array
-              console.log(copysessions[index]);
-              let movieVotes = Object.entries(copysessions[index]['movie_ids']);
-              for (const [m, v] of movieVotes) {
-                //this loop will be in the order that movie ids were added to the array
-                console.log(m, v);
-                if (v == numPlayers) {
-                  //all the players voted yes
-                  match = true;
-                  movie_id = m;
-                  break;
-                }
-              }
-            }
-            redisClient
-              .set('sessions', JSON.stringify(copysessions))
-              .then(() => {
-                //now set
-                res.status(200).json({ data: { message: 'thanks for voting.', movie_id, match } });
-              })
-              .catch((err) => {
-                console.log(`Failed Redis set sessions ${err}`);
+                return item;
               });
-          })
-          .catch((err) => {
-            console.log(`Failed Redis get sessions ${err}`);
-          });
+              console.log(copysessions[index]);
+              if (match == false) {
+                //check for other possible winners in the movie_ids array
+                console.log(copysessions[index]);
+                let movieVotes = Object.entries(copysessions[index]['movie_ids']);
+                for (const [m, v] of movieVotes) {
+                  //this loop will be in the order that movie ids were added to the array
+                  console.log(m, v);
+                  if (v == numPlayers) {
+                    //all the players voted yes
+                    match = true;
+                    movie_id = m;
+                    break;
+                  }
+                }
+              }
+              redisClient
+                .set('sessions', JSON.stringify(copysessions))
+                .then(() => {
+                  //now set
+                  res.status(200).json({ data: { message: 'thanks for voting.', movie_id, match } });
+                })
+                .catch((err) => {
+                  res.status(400).json({ code: 890, message: `Error: ${err}` });
+                  console.log(`Failed Redis set sessions ${err}`);
+                });
+            })
+            .catch((err) => {
+              res.status(400).json({ code: 892, message: `Error: ${err}` });
+              console.log(`Failed Redis get sessions ${err}`);
+            });
+        } else {
+          res.status(400).json({ code: 932, message: 'No device ids for this session.' });
+        }
       })
       .catch((err) => {
+        res.status(400).json({ code: 894, message: `Error: ${err}` });
         console.log(`Failed Redis get codes ${err}`);
       });
     // });
