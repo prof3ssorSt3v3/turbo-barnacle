@@ -231,11 +231,14 @@ router.get('/vote-movie', (req, res) => {
                 }
                 return item;
               });
-              console.log(copysessions[index]);
+              // console.log(copysessions[index]); index must be set
               if (match == false) {
                 //check for other possible winners in the movie_ids array
-                console.log(copysessions[index]);
-                let movieVotes = Object.entries(copysessions[index]['movie_ids']);
+                // console.log(copysessions[index]);
+                let movieVotes = [];
+                if (index && copysessions[index] && copysessions[index]['movie_ids']) {
+                  movieVotes = Object.entries(copysessions[index]['movie_ids']);
+                }
                 for (const [m, v] of movieVotes) {
                   //this loop will be in the order that movie ids were added to the array
                   console.log(m, v);
