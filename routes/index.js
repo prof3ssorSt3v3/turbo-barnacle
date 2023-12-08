@@ -209,6 +209,7 @@ router.get('/vote-movie', (req, res) => {
               }
               let index;
               let copysessions = sessions.map((item, idx) => {
+                console.log(item.session_id, vote, item.movie_ids);
                 if ((vote == true || vote == 'true') && item.session_id == session_id) {
                   index = idx;
                   let count = 1;
@@ -219,6 +220,8 @@ router.get('/vote-movie', (req, res) => {
                       count = 1;
                     }
                   }
+                  console.log('set count for true vote');
+                  console.log(item);
                   //only add the movie id when they voted yes
                   item.movie_ids[movie_id] = count;
                   if (numPlayers == count) {
