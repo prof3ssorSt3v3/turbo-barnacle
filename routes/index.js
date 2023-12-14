@@ -190,6 +190,7 @@ router.get('/vote-movie', (req, res) => {
     // connect().then(() => {
     let { vote, session_id, movie_id } = req.query;
     let match = false;
+    let submitted_movie = movie_id;
     redisClient
       .get('codes')
       .then((codes) => {
@@ -206,6 +207,7 @@ router.get('/vote-movie', (req, res) => {
         let numPlayers = codeobj?.device_ids.length ?? 0;
         //[{"session_id":"abcd", "device_ids":[1234, 4567], code: "abcd" },]
         if (numPlayers > 0) {
+          //we could change this to numPlayers > 1 to avoid instant match with one person
           redisClient
             .get('sessions')
             .then((sessions) => {
@@ -214,55 +216,49 @@ router.get('/vote-movie', (req, res) => {
                 //error handling
                 sessions = [];
               }
-              let index;
-              let copysessions = sessions.map((item, idx) => {
-                console.log(item.session_id, vote, item.movie_ids);
-                if ((vote == true || vote == 'true') && item.session_id == session_id) {
-                  index = idx;
-                  let count = 1;
-                  if (movie_id in item.movie_ids) {
-                    console.log(`voting for ${movie_id} which has value: ${item.movie_ids[movie_id]}`);
-                    if (typeof item.movie_ids[movie_id] == 'number') {
-                      count = item.movie_ids[movie_id] + 1;
-                    } else {
-                      count = 1;
-                    }
+              let userSession = sessions.find((s) => s.session_id == session_id);
+              if (!userSession) {
+                res.status(400).json({ code: 149, message: `Error: Not a valid session id` });
+                return;
+              }
+              if (userSession && (vote == true || vote == 'true')) {
+                //if they voted true then increment the count
+                let count = 1;
+                if (movie_id in userSession.movie_ids) {
+                  if (typeof userSession.movie_ids[movie_id] == 'number') {
+                    //add to previous vote count
+                    count = userSession.movie_ids[movie_id] + 1;
                   }
-                  console.log('set count for true vote');
-                  console.log(item);
-                  //only add the movie id when they voted yes
-                  item.movie_ids[movie_id] = count;
+                  userSession.movie_ids[movie_id] = count;
                   if (numPlayers == count) {
                     //we have a winner!
                     match = true;
                   }
+                } else {
+                  //first vote for this movie
+                  userSession.movie_ids[movie_id] = 1;
                 }
-                return item;
-              });
-              // console.log(copysessions[index]); index must be set
+              }
+
               if (match == false) {
-                //check for other possible winners in the movie_ids array
-                // console.log(copysessions[index]);
-                let movieVotes = [];
-                if (index && copysessions[index] && copysessions[index]['movie_ids']) {
-                  movieVotes = Object.entries(copysessions[index]['movie_ids']);
-                }
-                for (const [m, v] of movieVotes) {
+                //check for other possible winners in the movie_ids array of userSession
+                console.log(`User voted true OR false. It did not match but might be an older match for NOT ${movie_id}`);
+                let movieVotes = userSession.movie_ids;
+                for (const { mid, voteCount } of movieVotes) {
                   //this loop will be in the order that movie ids were added to the array
-                  // console.log(m, v);
-                  if (v == numPlayers) {
+                  if (voteCount == numPlayers) {
                     //all the players voted yes
                     match = true;
-                    movie_id = m;
+                    movie_id = mid;
                     break;
                   }
                 }
               }
               redisClient
-                .set('sessions', JSON.stringify(copysessions))
+                .set('sessions', JSON.stringify(sessions))
                 .then(() => {
                   //now set
-                  res.status(200).json({ data: { message: 'thanks for voting.', movie_id, match, num_devices: numPlayers } });
+                  res.status(200).json({ data: { message: 'thanks for voting.', movie_id, match, num_devices: numPlayers, submitted_movie } });
                 })
                 .catch((err) => {
                   res.status(400).json({ code: 890, message: `Error: ${err}` });
