@@ -254,7 +254,7 @@ router.get('/vote-movie', (req, res) => {
                 .set('sessions', JSON.stringify(copysessions))
                 .then(() => {
                   //now set
-                  res.status(200).json({ data: { message: 'thanks for voting.', movie_id, match } });
+                  res.status(200).json({ data: { message: 'thanks for voting.', movie_id, match, num_devices: numPlayers } });
                 })
                 .catch((err) => {
                   res.status(400).json({ code: 890, message: `Error: ${err}` });
