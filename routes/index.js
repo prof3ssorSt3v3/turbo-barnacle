@@ -77,8 +77,10 @@ router.get('/start-session', (req, res) => {
         codes = JSON.parse(codes);
         let timestamp = Date.now();
         if (codes == null) {
+          //first ever "codes" object in the array
           codes = [{ code, session_id, device_ids: [device_id], timestamp }];
         } else {
+          //codes array exists but creating a new entry
           let device_ids = [device_id];
           codes.push({ code, session_id, device_ids, timestamp });
         }
@@ -91,8 +93,10 @@ router.get('/start-session', (req, res) => {
           .then(function (sessions) {
             sessions = JSON.parse(sessions);
             if (sessions == null) {
+              //first ever session
               return redisClient.set('sessions', JSON.stringify([{ session_id, movie_ids: {} }]));
             } else {
+              //new session to be joined by other players
               sessions.push({ session_id, movie_ids: {} });
               return redisClient.set('sessions', JSON.stringify(sessions));
             }
@@ -135,6 +139,7 @@ router.get('/join-session', (req, res) => {
             session_id = obj.session_id; //get the session_id
             let deviceSet = new Set(obj.device_ids);
             deviceSet.add(device_id);
+            console.log(`added ${device_id} to ${session_id}`);
             // obj.device_ids.push(device_id); //add the device_id
             obj.device_ids = Array.from(deviceSet);
             return obj;
@@ -214,6 +219,7 @@ router.get('/vote-movie', (req, res) => {
                   index = idx;
                   let count = 1;
                   if (movie_id in item.movie_ids) {
+                    console.log(`voting for ${movie_id} which has value: ${item.movie_ids[movie_id]}`);
                     if (typeof item.movie_ids[movie_id] == 'number') {
                       count = item.movie_ids[movie_id] + 1;
                     } else {
