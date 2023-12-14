@@ -73,7 +73,7 @@ router.get('/start-session', (req, res) => {
       .get('codes')
       .then((codes) => {
         // console.log(typeof codes);
-        console.log(codes.toString());
+        // console.log(codes.toString());
         codes = JSON.parse(codes);
         let timestamp = Date.now();
         if (codes == null) {
@@ -159,11 +159,13 @@ router.get('/join-session', (req, res) => {
               res.status(200).json({ data: { message: 'new session created.', session_id } });
             })
             .catch((err) => {
+              res.status(400).json({ code: 543, message: 'Failed to create session' });
               console.log(`Failed Redis set ${err}`);
             });
         }
       })
       .catch((err) => {
+        res.status(400).json({ code: 786, message: 'Failed to read code.' });
         console.log(`Failed Redis get ${err}`);
       });
     // });
@@ -247,7 +249,7 @@ router.get('/vote-movie', (req, res) => {
                 }
                 for (const [m, v] of movieVotes) {
                   //this loop will be in the order that movie ids were added to the array
-                  console.log(m, v);
+                  // console.log(m, v);
                   if (v == numPlayers) {
                     //all the players voted yes
                     match = true;
@@ -264,12 +266,12 @@ router.get('/vote-movie', (req, res) => {
                 })
                 .catch((err) => {
                   res.status(400).json({ code: 890, message: `Error: ${err}` });
-                  console.log(`Failed Redis set sessions ${err}`);
+                  // console.log(`Failed Redis set sessions ${err}`);
                 });
             })
             .catch((err) => {
               res.status(400).json({ code: 892, message: `Error: ${err}` });
-              console.log(`Failed Redis get sessions ${err}`);
+              // console.log(`Failed Redis get sessions ${err}`);
             });
         } else {
           res.status(400).json({ code: 932, message: 'No device ids for this session.' });
@@ -277,7 +279,7 @@ router.get('/vote-movie', (req, res) => {
       })
       .catch((err) => {
         res.status(400).json({ code: 894, message: `Error: ${err}` });
-        console.log(`Failed Redis get codes ${err}`);
+        // console.log(`Failed Redis get codes ${err}`);
       });
     // });
   } else {
