@@ -156,7 +156,7 @@ router.get('/join-session', (req, res) => {
               //the entry in sessions [] should already exist
               //send the message and session back to user
               //returns {data: {String message, String session_id }}
-              res.status(200).json({ data: { message: 'new session created.', session_id } });
+              res.status(200).json({ data: { message: 'session joined.', session_id } });
             })
             .catch((err) => {
               res.status(400).json({ code: 543, message: 'Failed to create session' });
