@@ -243,8 +243,9 @@ router.get('/vote-movie', (req, res) => {
               if (match == false) {
                 //check for other possible winners in the movie_ids array of userSession
                 console.log(`User voted true OR false. It did not match but might be an older match for NOT ${movie_id}`);
-                let movieVotes = userSession.movie_ids;
-                for (const { mid, voteCount } of movieVotes) {
+                console.log(userSession.movie_ids);
+                let movieVotes = Object.entries(userSession.movie_ids);
+                for (const [mid, voteCount] of movieVotes) {
                   //this loop will be in the order that movie ids were added to the array
                   if (voteCount == numPlayers) {
                     //all the players voted yes
