@@ -196,7 +196,7 @@ router.get('/vote-movie', (req, res) => {
       .then((codes) => {
         codes = JSON.parse(codes);
         let codeobj = codes.find((obj) => {
-          console.log(`match ${obj.session_id}`);
+          // console.log(`match ${obj.session_id}`);
           if (obj.session_id == session_id) return true;
         });
         console.log(codeobj);
@@ -230,6 +230,7 @@ router.get('/vote-movie', (req, res) => {
                     count = userSession.movie_ids[movie_id] + 1;
                   }
                   userSession.movie_ids[movie_id] = count;
+                  console.log(`Users voted true for ${movie_id} ${count} times.`);
                   if (numPlayers == count) {
                     //we have a winner!
                     match = true;
