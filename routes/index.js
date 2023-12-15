@@ -199,12 +199,13 @@ router.get('/vote-movie', (req, res) => {
           // console.log(`match ${obj.session_id}`);
           if (obj.session_id == session_id) return true;
         });
-        console.log(codeobj);
         if (codeobj == null) {
           res.status(400).json({ code: 765, message: 'Invalid session id.' });
           return;
         }
         let numPlayers = codeobj?.device_ids.length ?? 0;
+        console.log(`voted - session_id: "${session_id}" device_ids:[${codeobj.device_ids}], movie_id ${movie_id}`);
+
         //[{"session_id":"abcd", "device_ids":[1234, 4567], code: "abcd" },]
         if (numPlayers > 0) {
           //we could change this to numPlayers > 1 to avoid instant match with one person
