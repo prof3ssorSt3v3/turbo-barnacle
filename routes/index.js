@@ -238,6 +238,12 @@ router.get('/vote-movie', (req, res) => {
                     match = true;
                   } else {
                     console.log(`true vote but wrong count. ${numPlayers} vs ${count}`);
+                    if (count > numPlayers) {
+                      res
+                        .status(400)
+                        .json({ code: 767, message: `Error: Invalid vote. You have voted ${count} times for movie ${movie_id}, but there are only ${numPlayers} devices in this session.` });
+                      return;
+                    }
                   }
                 } else {
                   //first vote for this movie
