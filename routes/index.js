@@ -222,6 +222,7 @@ router.get('/vote-movie', (req, res) => {
                 res.status(400).json({ code: 149, message: `Error: Not a valid session id` });
                 return;
               }
+              console.log(`${session_id} voted ${vote} for ${movie_id}`);
               if (userSession && (vote == true || vote == 'true')) {
                 //if they voted true then increment the count
                 let count = 1;
@@ -235,6 +236,8 @@ router.get('/vote-movie', (req, res) => {
                   if (numPlayers == count) {
                     //we have a winner!
                     match = true;
+                  } else {
+                    console.log(`true vote but wrong count. ${numPlayers} vs ${count}`);
                   }
                 } else {
                   //first vote for this movie
